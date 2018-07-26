@@ -94,14 +94,15 @@ export default {
 			this.predictedOffset = this.offset;
 
 			var angle = -((el._model.startAngle + el._model.endAngle) / 2) / (Math.PI);
+			let innerLabel = el._model.circumference > 0.5;
 			var val = Math.abs(angle - Math.trunc(angle));
 
 			if (val > 0.45 && val < 0.55) {
 				this.predictedOffset.x = 0;
 			} else if (angle <= 0.45 && angle >= -0.45) {
-				this.predictedOffset.x = this.size.width / 2;
+				this.predictedOffset.x = this.size.width / (innerLabel ? -2 : 2);
 			} else if (angle >= -1.45 && angle <= -0.55) {
-				this.predictedOffset.x = -this.size.width / 2;
+				this.predictedOffset.x = -this.size.width / (innerLabel ? -2 : 2);
 			}
 		};
 
@@ -255,7 +256,8 @@ export default {
 
 
 		this.update = function(view, elements, max) {
-			this.center = positioners.center(view, this.stretch);
+			let innerLabel = el._model.circumference > 0.5;
+			this.center = positioners.center(view, this.stretch, innerLabel);
 			this.moveLabelToOffset();
 
 			this.center.x += this.offset.x;
