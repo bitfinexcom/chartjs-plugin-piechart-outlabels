@@ -295,6 +295,7 @@ export default {
 					this.center.copy.y += .5;
 				}
 			}
+			return innerLabel;
 		};
 
 		this.moveLabelToOffset = function() {

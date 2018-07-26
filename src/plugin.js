@@ -140,8 +140,8 @@ Chart.plugins.register({
 			}
 
 			if (i < elements.length) {
-				label.update(el._view, elements, i);
-				label.drawLine(ctx);
+				const innerLabel = label.update(el._view, elements, i);
+				innerLabel || label.drawLine(ctx);
 			} else {
 				label.draw(ctx);
 			}
