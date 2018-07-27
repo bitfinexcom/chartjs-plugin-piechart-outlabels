@@ -298,13 +298,13 @@ var outlabeledCharts = {
 'use strict';
 
 var positioners = {
-	center: function(arc, stretch) {
+	center: function(arc, stretch, invert) {
 		var angle = (arc.startAngle + arc.endAngle) / 2;
 		var cosA = Math.cos(angle);
 		var sinA = Math.sin(angle);
 		var d = arc.outerRadius;
 
-		var stretchedD = d + stretch;
+		var stretchedD = invert ? d - stretch : d + stretch;
 		return {
 			x: arc.x + cosA * stretchedD,
 			y: arc.y + sinA * stretchedD,
@@ -436,14 +436,15 @@ var classes = {
 			this.predictedOffset = this.offset;
 
 			var angle = -((el._model.startAngle + el._model.endAngle) / 2) / (Math.PI);
+			let innerLabel = el._model.circumference > 0.5;
 			var val = Math.abs(angle - Math.trunc(angle));
 
 			if (val > 0.45 && val < 0.55) {
 				this.predictedOffset.x = 0;
 			} else if (angle <= 0.45 && angle >= -0.45) {
-				this.predictedOffset.x = this.size.width / 2;
+				this.predictedOffset.x = this.size.width / (innerLabel ? -2 : 2);
 			} else if (angle >= -1.45 && angle <= -0.55) {
-				this.predictedOffset.x = -this.size.width / 2;
+				this.predictedOffset.x = -this.size.width / (innerLabel ? -2 : 2);
 			}
 		};
 
@@ -597,7 +598,8 @@ var classes = {
 
 
 		this.update = function(view, elements, max) {
-			this.center = positioners.center(view, this.stretch);
+			let innerLabel = el._model.circumference > 0.5;
+			this.center = positioners.center(view, this.stretch, innerLabel);
 			this.moveLabelToOffset();
 
 			this.center.x += this.offset.x;
@@ -635,6 +637,7 @@ var classes = {
 					this.center.copy.y += .5;
 				}
 			}
+			return innerLabel;
 		};
 
 		this.moveLabelToOffset = function() {
@@ -660,6 +663,7 @@ outlabeledCharts.init();
 Chart$1.defaults.global.plugins.outlabels = defaults;
 
 var LABEL_KEY = defaults.LABEL_KEY;
+let activeTooltip = null;
 
 function configure(dataset, options) {
 	var override = dataset.outlabels;
@@ -682,6 +686,46 @@ Chart$1.plugins.register({
 		chart.sizeChanged = true;
 	},
 
+	beforeEvent: function(chart, event, options) {
+		const {
+			x,
+			y
+		} = event;
+
+		const {
+			tooltipToggle,
+			toggleOffDistance
+		} = options;
+
+		const elems = chart.getDatasetMeta(0).data;
+		let center, data;
+
+		if (activeTooltip && (Math.abs(activeTooltip.x - x) > toggleOffDistance || Math.abs(activeTooltip.y - y) > toggleOffDistance)) {
+			tooltipToggle(null, null);
+			activeTooltip = null;
+		}
+		for (let i = 0; i < elems.length; i++) {
+			if (!elems[i].$outlabels) {
+				continue;
+			}
+			const within = elems[i].$outlabels.containsPoint({
+				x: event.x,
+				y: event.y,
+			});
+			if (within) {
+				center = elems[i].$outlabels.center;
+				const index = elems[i]._index;
+				data = chart.data.labels[index];
+				tooltipToggle(center, data);
+				activeTooltip = center;
+				return;
+			}
+		}
+
+		return;
+	},
+
+
 	afterDatasetUpdate: function(chart, args, options) {
 		var labels = chart.config.data.labels;
 		var dataset = chart.data.datasets[args.index];
@@ -699,7 +743,7 @@ Chart$1.plugins.register({
 			percent = dataset.data[i] / args.meta.total;
 			newLabel = null;
 
-			if (display && el && !el.hidden) {
+			if (display && el && !el.hidden && el._model.circumference > options.tooltipCutoff) {
 				try {
 					context = {
 						chart: chart,
@@ -746,8 +790,8 @@ Chart$1.plugins.register({
 			}
 
 			if (i < elements.length) {
-				label.update(el._view, elements, i);
-				label.drawLine(ctx);
+				const innerLabel = label.update(el._view, elements, i);
+				innerLabel || label.drawLine(ctx);
 			} else {
 				label.draw(ctx);
 			}
