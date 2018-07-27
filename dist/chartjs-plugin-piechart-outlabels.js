@@ -436,15 +436,15 @@ var classes = {
 			this.predictedOffset = this.offset;
 
 			var angle = -((el._model.startAngle + el._model.endAngle) / 2) / (Math.PI);
-			let innerLabel = el._model.circumference > 0.5;
+			var innerLabelInit = el._model.circumference > 0.5;
 			var val = Math.abs(angle - Math.trunc(angle));
 
 			if (val > 0.45 && val < 0.55) {
 				this.predictedOffset.x = 0;
 			} else if (angle <= 0.45 && angle >= -0.45) {
-				this.predictedOffset.x = this.size.width / (innerLabel ? -2 : 2);
+				this.predictedOffset.x = this.size.width / (innerLabelInit ? -2 : 2);
 			} else if (angle >= -1.45 && angle <= -0.55) {
-				this.predictedOffset.x = -this.size.width / (innerLabel ? -2 : 2);
+				this.predictedOffset.x = -this.size.width / (innerLabelInit ? -2 : 2);
 			}
 		};
 
@@ -598,7 +598,7 @@ var classes = {
 
 
 		this.update = function(view, elements, max) {
-			let innerLabel = el._model.circumference > 0.5;
+			var innerLabel = el._model.circumference > 0.5;
 			this.isInner = innerLabel;
 			this.center = positioners.center(view, this.stretch, innerLabel);
 			this.moveLabelToOffset();
@@ -664,7 +664,7 @@ outlabeledCharts.init();
 Chart$1.defaults.global.plugins.outlabels = defaults;
 
 var LABEL_KEY = defaults.LABEL_KEY;
-let activeTooltip = null;
+var activeTooltip = null;
 
 function configure(dataset, options) {
 	var override = dataset.outlabels;
@@ -688,24 +688,20 @@ Chart$1.plugins.register({
 	},
 
 	beforeEvent: function(chart, event, options) {
-		const {
-			x,
-			y
-		} = event;
+		const x = event.x;
+		const y = event.y;
 
-		const {
-			tooltipToggle,
-			toggleOffDistance
-		} = options;
+		const tooltipToggle = options.tooltipToggle;
+		const toggleOffDistance = options.toggleOffDistance;
 
 		const elems = chart.getDatasetMeta(0).data;
-		let center, data;
+		var center, data;
 
 		if (activeTooltip && (Math.abs(activeTooltip.x - x) > toggleOffDistance || Math.abs(activeTooltip.y - y) > toggleOffDistance)) {
 			tooltipToggle(null, null);
 			activeTooltip = null;
 		}
-		for (let i = 0; i < elems.length; i++) {
+		for (var i = 0; i < elems.length; i++) {
 			if (!elems[i].$outlabels) {
 				continue;
 			}
@@ -792,7 +788,7 @@ Chart$1.plugins.register({
 
 			if (i < elements.length) {
 				const innerLabel = label.update(el._view, elements, i);
-				innerLabel || label.drawLine(ctx);
+				innerLabel ? null : label.drawLine(ctx);
 			} else {
 				label.draw(ctx);
 			}
