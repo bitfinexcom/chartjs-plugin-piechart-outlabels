@@ -39,7 +39,7 @@ export default {
 			var prec = val.replace(/%p\./gi, '');
 			if (prec.length) {
 				return +prec;
-			} else  {
+			} else {
 				return config.percentPrecision || defaults.percentPrecision;
 			}
 		}).forEach(function(val) {
@@ -94,14 +94,15 @@ export default {
 			this.predictedOffset = this.offset;
 
 			var angle = -((el._model.startAngle + el._model.endAngle) / 2) / (Math.PI);
+			let innerLabel = el._model.circumference > 0.5;
 			var val = Math.abs(angle - Math.trunc(angle));
 
 			if (val > 0.45 && val < 0.55) {
 				this.predictedOffset.x = 0;
 			} else if (angle <= 0.45 && angle >= -0.45) {
-				this.predictedOffset.x = this.size.width / 2;
+				this.predictedOffset.x = this.size.width / (innerLabel ? -2 : 2);
 			} else if (angle >= -1.45 && angle <= -0.55) {
-				this.predictedOffset.x = -this.size.width / 2;
+				this.predictedOffset.x = -this.size.width / (innerLabel ? -2 : 2);
 			}
 		};
 
@@ -161,9 +162,9 @@ export default {
 				offset = 5;
 			}
 
-			return	this.labelRect.x - offset <= point.x && point.x <= this.labelRect.x + this.labelRect.width + offset
+			return	this.textRect.x - offset <= point.x && point.x <= this.textRect.x + this.textRect.width + offset
 							&&
-						this.labelRect.y - offset <= point.y && point.y <= this.labelRect.y + this.labelRect.height + offset;
+						this.textRect.y - offset <= point.y && point.y <= this.textRect.y + this.textRect.height + offset;
 		};
 
 
@@ -255,7 +256,9 @@ export default {
 
 
 		this.update = function(view, elements, max) {
-			this.center = positioners.center(view, this.stretch);
+			let innerLabel = el._model.circumference > 0.5;
+			this.isInner = innerLabel;
+			this.center = positioners.center(view, this.stretch, innerLabel);
 			this.moveLabelToOffset();
 
 			this.center.x += this.offset.x;
@@ -283,20 +286,17 @@ export default {
 							valid = false;
 							break;
 						}
-
-						if(this.containsPoint(elPoints[p])) {
-							valid = false;
-							break;
-						}
 					}
 				}
 
 				if (!valid) {
-					this.center = positioners.moveFromAnchor(this.center, 1);
-					this.center.x += this.offset.x;
-					this.center.y += this.offset.y;
+					this.center.x -= 1.5;
+					this.center.y += .5;
+					this.center.copy.x -= 1.5;
+					this.center.copy.y += .5;
 				}
 			}
+			return innerLabel;
 		};
 
 		this.moveLabelToOffset = function() {

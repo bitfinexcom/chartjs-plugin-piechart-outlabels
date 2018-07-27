@@ -13,6 +13,7 @@ outlabeledCharts.init();
 Chart.defaults.global.plugins.outlabels = defaults;
 
 var LABEL_KEY = defaults.LABEL_KEY;
+let activeTooltip = null;
 
 function configure(dataset, options) {
 	var override = dataset.outlabels;
@@ -35,6 +36,46 @@ Chart.plugins.register({
 		chart.sizeChanged = true;
 	},
 
+	beforeEvent: function(chart, event, options) {
+		const {
+			x,
+			y
+		} = event;
+
+		const {
+			tooltipToggle,
+			toggleOffDistance
+		} = options;
+
+		const elems = chart.getDatasetMeta(0).data;
+		let center, data;
+
+		if (activeTooltip && (Math.abs(activeTooltip.x - x) > toggleOffDistance || Math.abs(activeTooltip.y - y) > toggleOffDistance)) {
+			tooltipToggle(null, null);
+			activeTooltip = null;
+		}
+		for (let i = 0; i < elems.length; i++) {
+			if (!elems[i].$outlabels) {
+				continue;
+			}
+			const within = elems[i].$outlabels.containsPoint({
+				x: event.x,
+				y: event.y,
+			});
+			if (within && !elems[i].$outlabels.isInner) {
+				center = elems[i].$outlabels.center;
+				const index = elems[i]._index;
+				data = chart.data.labels[index];
+				tooltipToggle(center, data);
+				activeTooltip = center;
+				return;
+			}
+		}
+
+		return;
+	},
+
+
 	afterDatasetUpdate: function(chart, args, options) {
 		var labels = chart.config.data.labels;
 		var dataset = chart.data.datasets[args.index];
@@ -52,7 +93,7 @@ Chart.plugins.register({
 			percent = dataset.data[i] / args.meta.total;
 			newLabel = null;
 
-			if (display && el && !el.hidden) {
+			if (display && el && !el.hidden && (el._model.circumference > options.tooltipCutoff || i < options.minLabels)) {
 				try {
 					context = {
 						chart: chart,
@@ -99,8 +140,8 @@ Chart.plugins.register({
 			}
 
 			if (i < elements.length) {
-				label.update(el._view, elements, i);
-				label.drawLine(ctx);
+				const innerLabel = label.update(el._view, elements, i);
+				innerLabel || label.drawLine(ctx);
 			} else {
 				label.draw(ctx);
 			}
