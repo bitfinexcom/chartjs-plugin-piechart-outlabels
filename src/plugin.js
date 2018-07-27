@@ -13,7 +13,7 @@ outlabeledCharts.init();
 Chart.defaults.global.plugins.outlabels = defaults;
 
 var LABEL_KEY = defaults.LABEL_KEY;
-let activeTooltip = null;
+var activeTooltip = null;
 
 function configure(dataset, options) {
 	var override = dataset.outlabels;
@@ -37,24 +37,20 @@ Chart.plugins.register({
 	},
 
 	beforeEvent: function(chart, event, options) {
-		const {
-			x,
-			y
-		} = event;
+		const x = event.x;
+		const y = event.y;
 
-		const {
-			tooltipToggle,
-			toggleOffDistance
-		} = options;
+		const tooltipToggle = options.tooltipToggle;
+		const toggleOffDistance = options.toggleOffDistance;
 
 		const elems = chart.getDatasetMeta(0).data;
-		let center, data;
+		var center, data;
 
 		if (activeTooltip && (Math.abs(activeTooltip.x - x) > toggleOffDistance || Math.abs(activeTooltip.y - y) > toggleOffDistance)) {
 			tooltipToggle(null, null);
 			activeTooltip = null;
 		}
-		for (let i = 0; i < elems.length; i++) {
+		for (var i = 0; i < elems.length; i++) {
 			if (!elems[i].$outlabels) {
 				continue;
 			}
@@ -141,7 +137,7 @@ Chart.plugins.register({
 
 			if (i < elements.length) {
 				const innerLabel = label.update(el._view, elements, i);
-				innerLabel || label.drawLine(ctx);
+				innerLabel ? null : label.drawLine(ctx);
 			} else {
 				label.draw(ctx);
 			}
