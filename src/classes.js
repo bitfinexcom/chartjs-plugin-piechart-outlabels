@@ -257,6 +257,7 @@ export default {
 
 		this.update = function(view, elements, max) {
 			let innerLabel = el._model.circumference > 0.5;
+			this.isInner = innerLabel;
 			this.center = positioners.center(view, this.stretch, innerLabel);
 			this.moveLabelToOffset();
 
