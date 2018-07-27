@@ -688,13 +688,13 @@ Chart$1.plugins.register({
 	},
 
 	beforeEvent: function(chart, event, options) {
-		const x = event.x;
-		const y = event.y;
+		var x = event.x;
+		var y = event.y;
 
-		const tooltipToggle = options.tooltipToggle;
-		const toggleOffDistance = options.toggleOffDistance;
+		var tooltipToggle = options.tooltipToggle;
+		var toggleOffDistance = options.toggleOffDistance;
 
-		const elems = chart.getDatasetMeta(0).data;
+		var elems = chart.getDatasetMeta(0).data;
 		var center, data;
 
 		if (activeTooltip && (Math.abs(activeTooltip.x - x) > toggleOffDistance || Math.abs(activeTooltip.y - y) > toggleOffDistance)) {
@@ -705,13 +705,13 @@ Chart$1.plugins.register({
 			if (!elems[i].$outlabels) {
 				continue;
 			}
-			const within = elems[i].$outlabels.containsPoint({
+			var within = elems[i].$outlabels.containsPoint({
 				x: event.x,
 				y: event.y,
 			});
 			if (within && !elems[i].$outlabels.isInner) {
 				center = elems[i].$outlabels.center;
-				const index = elems[i]._index;
+				var index = elems[i]._index;
 				data = chart.data.labels[index];
 				tooltipToggle(center, data);
 				activeTooltip = center;
@@ -787,8 +787,8 @@ Chart$1.plugins.register({
 			}
 
 			if (i < elements.length) {
-				const innerLabel = label.update(el._view, elements, i);
-				innerLabel ? null : label.drawLine(ctx);
+				var innerLabel = label.update(el._view, elements, i);
+				innerLabel || label.drawLine(ctx);
 			} else {
 				label.draw(ctx);
 			}
