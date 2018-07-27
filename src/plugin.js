@@ -137,7 +137,7 @@ Chart.plugins.register({
 
 			if (i < elements.length) {
 				const innerLabel = label.update(el._view, elements, i);
-				innerLabel ? null : label.drawLine(ctx);
+				innerLabel || label.drawLine(ctx);
 			} else {
 				label.draw(ctx);
 			}
