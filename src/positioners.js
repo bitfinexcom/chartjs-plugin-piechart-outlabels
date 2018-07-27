@@ -1,13 +1,13 @@
 'use strict';
 
 export default {
-	center: function(arc, stretch) {
+	center: function(arc, stretch, invert) {
 		var angle = (arc.startAngle + arc.endAngle) / 2;
 		var cosA = Math.cos(angle);
 		var sinA = Math.sin(angle);
 		var d = arc.outerRadius;
 
-		var stretchedD = d + stretch;
+		var stretchedD = invert ? d - stretch : d + stretch;
 		return {
 			x: arc.x + cosA * stretchedD,
 			y: arc.y + sinA * stretchedD,
