@@ -599,6 +599,7 @@ var classes = {
 
 		this.update = function(view, elements, max) {
 			let innerLabel = el._model.circumference > 0.5;
+			this.isInner = innerLabel;
 			this.center = positioners.center(view, this.stretch, innerLabel);
 			this.moveLabelToOffset();
 
@@ -712,7 +713,7 @@ Chart$1.plugins.register({
 				x: event.x,
 				y: event.y,
 			});
-			if (within) {
+			if (within && !elems[i].$outlabels.isInner) {
 				center = elems[i].$outlabels.center;
 				const index = elems[i]._index;
 				data = chart.data.labels[index];
@@ -743,7 +744,7 @@ Chart$1.plugins.register({
 			percent = dataset.data[i] / args.meta.total;
 			newLabel = null;
 
-			if (display && el && !el.hidden && el._model.circumference > options.tooltipCutoff) {
+			if (display && el && !el.hidden && (el._model.circumference > options.tooltipCutoff || i < options.minLabels)) {
 				try {
 					context = {
 						chart: chart,
