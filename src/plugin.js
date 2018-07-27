@@ -13,7 +13,7 @@ outlabeledCharts.init();
 Chart.defaults.global.plugins.outlabels = defaults;
 
 var LABEL_KEY = defaults.LABEL_KEY;
-let activeTooltip = null;
+var activeTooltip = null;
 
 function configure(dataset, options) {
 	var override = dataset.outlabels;
@@ -37,34 +37,30 @@ Chart.plugins.register({
 	},
 
 	beforeEvent: function(chart, event, options) {
-		const {
-			x,
-			y
-		} = event;
+		var x = event.x;
+		var y = event.y;
 
-		const {
-			tooltipToggle,
-			toggleOffDistance
-		} = options;
+		var tooltipToggle = options.tooltipToggle;
+		var toggleOffDistance = options.toggleOffDistance;
 
-		const elems = chart.getDatasetMeta(0).data;
-		let center, data;
+		var elems = chart.getDatasetMeta(0).data;
+		var center, data;
 
 		if (activeTooltip && (Math.abs(activeTooltip.x - x) > toggleOffDistance || Math.abs(activeTooltip.y - y) > toggleOffDistance)) {
 			tooltipToggle(null, null);
 			activeTooltip = null;
 		}
-		for (let i = 0; i < elems.length; i++) {
+		for (var i = 0; i < elems.length; i++) {
 			if (!elems[i].$outlabels) {
 				continue;
 			}
-			const within = elems[i].$outlabels.containsPoint({
+			var within = elems[i].$outlabels.containsPoint({
 				x: event.x,
 				y: event.y,
 			});
 			if (within && !elems[i].$outlabels.isInner) {
 				center = elems[i].$outlabels.center;
-				const index = elems[i]._index;
+				var index = elems[i]._index;
 				data = chart.data.labels[index];
 				tooltipToggle(center, data);
 				activeTooltip = center;
@@ -140,7 +136,7 @@ Chart.plugins.register({
 			}
 
 			if (i < elements.length) {
-				const innerLabel = label.update(el._view, elements, i);
+				var innerLabel = label.update(el._view, elements, i);
 				innerLabel || label.drawLine(ctx);
 			} else {
 				label.draw(ctx);
